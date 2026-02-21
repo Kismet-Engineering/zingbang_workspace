@@ -1,0 +1,91 @@
+# ZingBang Workspace
+
+This is the meta-repo entrypoint for ZingBang development. Launch opencode from this directory to work across all ZingBang repos with full context.
+
+## Repository Map
+
+| Repo | Purpose | Key Commands |
+|------|---------|--------------|
+| `zingbang_platform_api` | Platform admin plane API (Go) | `mise run build`, `mise run test`, `mise run db:up`, `mise run migrate:up` |
+| `zingbang_local_experiments` | Local federation E2E, kind/Submariner/Yugabyte | `mise run kind:create`, `mise run submariner:deploy`, `mise run ci:e2e:federation` |
+| `zingbang_foundations` | Cloud infra (OpenTofu), AWS/GCP foundations | `mise run tofu:plan:dev`, `mise run tofu:apply:dev` |
+| `zingbang_cluster_ops` | Cluster manifests, GitOps configs | N/A (YAML manifests) |
+| `zingbang_business` | ADRs, briefs, architecture docs | N/A (Markdown) |
+| `zingbang_site` | Product/site implementation | TBD |
+
+## Terminology
+
+- `platform admin plane`: Management/API plane at `api.<product>.<tld>` (MVP: `api.zingbang.io`)
+- `customer runtime plane`: Workload/data plane at `apps.<product>.<tld>` (MVP: `apps.zingbang.io`)
+
+## Cross-Repo Workflows
+
+### Platform API → Cluster Ops Promotion
+1. Merge to `main` in `zingbang_platform_api`
+2. `release-and-promote.yml` builds ARM64 image, pushes to GHCR
+3. Creates PR in `zingbang_cluster_ops` with updated image tag
+4. Merge cluster-ops PR to deploy to dev clusters
+
+### Local Federation E2E
+1. `zingbang_local_experiments` CI pulls `ghcr.io/kismet-engineering/zingbang-platform-api:dev`
+2. Creates kind clusters (aws, gcp) with Submariner mesh
+3. Deploys Yugabyte, runs platform-api migrations
+4. Executes federation lifecycle tests
+
+### Infra Changes
+1. Edit OpenTofu in `zingbang_foundations`
+2. Run `mise run tofu:plan:dev` to validate
+3. Apply changes, export outputs
+4. Update downstream consumers if output shapes change
+
+## Shared Conventions
+
+### Commit Style
+- Short, imperative subjects ("Add compose scaffold", "Fix image arch mismatch")
+- Reference Linear issue ID in commits and PRs
+- Group related changes by concern
+
+### Linear Integration
+- Linear is source of truth for task state
+- Prefer projects: `Platform Delivery` or `Go-To-Market`
+- Label conventions (lightweight): one `track:*`, one `type:*`, one `horizon:*`, one `component:*`
+- Update issue with file paths and validation notes after implementation
+
+### Code Style
+- Go: tight package boundaries (`api` for transport, `service` for domain)
+- YAML: 2-space indentation
+- Markdown: concise headings, bullet lists
+- Keep files ASCII unless existing content requires otherwise
+
+### Security
+- Never commit secrets or `.env` files
+- Use `local/.env` for local-only secrets (gitignored)
+- Rotate credentials when sharing compose files
+
+## Active Linear Context
+
+Current focus areas (update as priorities shift):
+- Federation E2E CI: `KIS-*` in Platform Delivery
+- Substrate foundations: `KIS-101` (AWS), `KIS-102` (GCP), `KIS-103` (federation contract)
+- Platform API features: tracked in Platform Delivery project
+
+## Environment Setup
+
+### Prerequisites
+- `mise` for task running
+- `podman` or `docker` for containers
+- `kubectl`, `kind`, `subctl` for k8s/federation work
+- `LINEAR_API_KEY` exported for Linear MCP
+
+### Quick Start
+```bash
+cd ~/dev/zingbang/zingbang_workspace
+opencode  # Launches with full project context
+```
+
+## Related Documentation
+
+- `../zingbang_business/docs/adrs/` - Architecture Decision Records
+- `../zingbang_business/docs/roadmap/` - Roadmap docs
+- `../zingbang_platform_api/docs/design-freeze-v0.md` - API design freeze
+- `../zingbang_platform_api/docs/api/` - OpenAPI specs
