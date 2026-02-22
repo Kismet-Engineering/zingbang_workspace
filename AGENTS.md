@@ -1,6 +1,6 @@
 # ZingBang Workspace
 
-This is the meta-repo entrypoint for ZingBang development. Launch opencode from this directory to work across all ZingBang repos with full context.
+This is the meta-repo entrypoint for ZingBang development. Launch `opencode` from this directory when you need workspace-level context, then `cd` into a sibling repo to do real work: each sibling (`zingbang_business`, `zingbang_foundations`, etc.) is the actual project with its own `mise` tasks and tooling.
 
 ## Repository Map
 
@@ -73,16 +73,20 @@ Current focus areas (update as priorities shift):
 ## Environment Setup
 
 ### Prerequisites
-- `mise` for task running
+- `mise` for per-repo task running (run `mise` only inside the repo whose `.mise.toml` you need)
 - `podman` or `docker` for containers
 - `kubectl`, `kind`, `subctl` for k8s/federation work
-- `LINEAR_API_KEY` exported for Linear MCP
 
 ### Quick Start
 ```bash
 cd ~/dev/zingbang/zingbang_workspace
 opencode  # Launches with full project context
+cd zingbang_business  # move into a real repo before running mise or other repo-specific commands
 ```
+
+### Release/Automation Notes
+- Always run `mise run <task>` inside the repo that owns the `.mise.toml` defining `<task>` (e.g., release notes live in `zingbang_business`). `mise` run from the workspace root will report "no tasks defined" because the workspace itself is just an entrypoint.
+- Credentials for release automation (LINEAR API key, AWS/GCP roles, email service tokens) come through environment; do not hardcode secrets in files. See `scripts/` directories in other repos for CLI helpers.
 
 ## Related Documentation
 
