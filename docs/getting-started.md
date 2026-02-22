@@ -1,0 +1,149 @@
+# ZingBang Workspace: Getting Started
+
+This guide is for human contributors joining the ZingBang org. It covers the essentials: workstation setup, repo layout, architecture basics, and how we ship.
+
+## What we are building
+
+ZingBang is a developer-first platform for globally available services. We are building a control plane plus cross-cloud runtime foundations with strong resilience and clear operational semantics.
+
+## Accounts and access you will need
+
+- GitHub access to `Kismet-Engineering`
+- Linear access to the ZingBang workspace
+- 1Password access to the `workstation` vault for shared credentials
+
+## Workstation setup (baseline)
+
+We standardize on Colima as the local container runtime. Install the core tools:
+
+```bash
+brew install colima docker mise gh kubectl kind subctl
+```
+
+Start Colima once after install:
+
+```bash
+colima start
+```
+
+Quick sanity checks:
+
+```bash
+mise --version
+gh --version
+docker --version
+kubectl version --client
+kind --version
+subctl version
+```
+
+## Clone and layout
+
+We keep all repos under a single workspace directory:
+
+```
+~/dev/zingbang/
+  zingbang_workspace/
+  zingbang_platform_api/
+  zingbang_foundations/
+  zingbang_cluster_ops/
+  zingbang_local_experiments/
+  zingbang_business/
+  zingbang_site/
+```
+
+Clone the repos you need for your work. Each repo is autonomous and owns its own tooling and tasks.
+
+## Repository map
+
+- `zingbang_platform_api`
+  - Control plane API and contracts
+  - Onboarding flows, billing and event model, docs
+
+- `zingbang_foundations`
+  - Cloud infrastructure foundations (OpenTofu)
+  - AWS/GCP environment bootstrap and federation prerequisites
+
+- `zingbang_cluster_ops`
+  - GitOps source-of-truth for runtime components
+  - Flux reconciliation, environment overlays, ops config
+
+- `zingbang_local_experiments`
+  - E2E experiments and validation sandboxes
+  - Local federation runs used to de-risk architecture decisions
+
+- `zingbang_site`
+  - Public-facing product site and docs presentation
+
+- `zingbang_business`
+  - Strategy, planning artifacts, ADRs, and roadmap context
+
+## High-level architecture
+
+ZingBang has two planes:
+
+- **Platform admin plane**: management API at `api.zingbang.io`
+- **Customer runtime plane**: workload/data plane at `apps.zingbang.io`
+
+Flow at a glance:
+
+1. Platform API defines contracts and lifecycle semantics.
+2. Foundations and cluster-ops establish the runtime substrate in AWS/GCP.
+3. Local experiments validate federation behaviors and operational evidence.
+4. Site and docs communicate the system clearly to users.
+
+## How we work (Linear + GitHub)
+
+- Linear is the source of truth for task state.
+- Use consistent labels: one `track:*`, one `type:*`, one `horizon:*`, one `component:*`.
+- Commit messages are short, imperative, and include the Linear ID.
+- PRs and issues should link to each other and include validation notes.
+- When closing a Linear ticket, add a comment that links to the PR/commit and summarizes evidence delivered.
+
+## Versioning and release process
+
+### Platform API images
+
+- Merges to `main` in `zingbang_platform_api` publish container images to GHCR.
+- The release workflow publishes `sha-<commit>` images and a `dev` tag by default.
+- The same workflow opens a promotion PR in `zingbang_cluster_ops` to update runtime image tags.
+
+### GitOps promotion
+
+- `zingbang_cluster_ops` is the runtime source-of-truth.
+- Promotion is done via PRs that update image tags and env overlays; Flux reconciles the changes.
+
+### Business releases and changelog
+
+- Release notes and changelog live in `zingbang_business/docs/releases/`.
+- Use those docs for user-facing release summaries and internal release tracking.
+
+## Common workflows
+
+Platform API to runtime promotion:
+
+1. Merge to `main` in `zingbang_platform_api`.
+2. `release-and-promote.yml` builds and publishes GHCR images.
+3. A PR is created in `zingbang_cluster_ops` updating the image tag.
+4. Merge the cluster-ops PR to deploy to dev clusters.
+
+Local federation E2E:
+
+1. `zingbang_local_experiments` CI pulls the platform API image.
+2. Creates kind clusters with Submariner mesh.
+3. Deploys Yugabyte and runs migrations.
+4. Executes federation lifecycle tests.
+
+Infra changes:
+
+1. Edit OpenTofu in `zingbang_foundations`.
+2. Run `mise run tofu:plan:dev` and review output.
+3. Apply changes and export outputs.
+4. Update downstream consumers if output shapes change.
+
+## Where to look next
+
+- `zingbang_workspace/AGENTS.md` for conventions and shared workflows
+- `zingbang_platform_api/README.md` for API setup and release automation
+- `zingbang_local_experiments/README.md` for Colima-based local E2E flows
+- `zingbang_business/docs/releases/` for release notes and changelog
