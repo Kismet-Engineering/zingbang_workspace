@@ -50,6 +50,7 @@ This is the meta-repo entrypoint for ZingBang development. Launch opencode from 
 - Prefer projects: `Platform Delivery` or `Go-To-Market`
 - Label conventions (lightweight): one `track:*`, one `type:*`, one `horizon:*`, one `component:*`
 - Update issue with file paths and validation notes after implementation
+- Always close tickets with a comment that links to the work (commit/PR) and summarizes evidence delivered
 
 ### Code Style
 - Go: tight package boundaries (`api` for transport, `service` for domain)
