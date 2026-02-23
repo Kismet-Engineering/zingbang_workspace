@@ -45,6 +45,15 @@ This is the meta-repo entrypoint for ZingBang development. Launch `opencode` fro
 - Reference Linear issue ID in commits and PRs
 - Group related changes by concern
 
+### Pre-Commit Verification
+
+Run local verification for changes that can be validated in under ~5 minutes.
+
+- Infra/manifests: validate + smoke test locally (example: Yugabyte changes require `mise run yb:k8s-up` and `mise run yb:k8s-smoke`).
+- Scripts: run the script locally and shellcheck when possible.
+- Application code: run the relevant unit tests and lint/typecheck tasks when available.
+- Full federation E2E is not required pre-commit, but changes must be locally sanity checked to avoid CI-only debugging.
+
 ### Linear Integration
 - Linear is source of truth for task state
 - Prefer projects: `Platform Delivery` or `Go-To-Market`
