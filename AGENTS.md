@@ -74,6 +74,10 @@ Run local verification for changes that can be validated in under ~5 minutes.
 - Use `local/.env` for local-only secrets (gitignored)
 - Rotate credentials when sharing compose files
 
+### GitOps Discipline
+- Avoid "monkey patching" shared clusters with ad-hoc `kubectl apply`, `helm install`, or `terraform apply` invocations. Land declarative changes in the owning repo (or the appropriate `mise` automation) and let Flux/CI reconcile them.
+- If a break-glass live edit is unavoidable, record the exact commands in the Linear issue and follow up immediately with a GitOps change that makes the fix repeatable before leaving the cluster in that state.
+
 ## Active Linear Context
 
 Current focus areas (update as priorities shift):
