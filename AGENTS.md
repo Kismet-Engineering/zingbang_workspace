@@ -38,6 +38,8 @@ This is the meta-repo entrypoint for ZingBang development. Launch `opencode` fro
 3. Apply changes, export outputs
 4. Update downstream consumers if output shapes change
 
+See `docs/getting-started.md` for the high-level delivery flow and the current owner responsibilities between the repos.
+
 ## Shared Conventions
 
 ### Commit Style

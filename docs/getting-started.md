@@ -92,6 +92,33 @@ Flow at a glance:
 3. Local experiments validate federation behaviors and operational evidence.
 4. Site and docs communicate the system clearly to users.
 
+## Delivery pipeline and responsibilities
+
+We orchestrate changes through a tight cross-repo delivery pipeline so every plane stays aligned. The simplified dependency graph below shows how a change typically propagates.
+
+```mermaid
+flowchart LR
+    ZA[zingbang_platform_api (control plane)] --> ZC[zingbang_cluster_ops (runtime config)]
+    ZF[zingbang_foundations (cloud infra)] --> ZC
+    ZC --> ZLE[zingbang_local_experiments CI]
+    ZC --> Managed[Managed clusters (dev/stage/prod)]
+    ZLE --> CI[CI evidence / regression suites]
+    ZA --> Managed
+```
+
+### Roles & flow
+
+1. **Platform API** owns the control plane code that interacts with tenants, billing, migrations, and exposes contracts to the runtime.
+2. **Foundations** targets the cloud provider primitives (AWS/GCP) using OpenTofu and publishes outputs consumed by runtime overlays.
+3. **Cluster Ops** stitches together runtime manifests and mirror repositories (Flux). It consumes artifacts from platform-api/foundations and deploys them to the managed clusters.
+4. **Local Experiments** pull the same images/manifests that cluster-ops deploys and run federation E2E locally (kind + Colima) to provide fast developer feedback.
+
+### Development checklist
+
+- If you touch the API or migrations, merge the change in `zingbang_platform_api`, then let `release-and-promote.yml` publish an image and open a cluster-ops PR. Merge the cluster-ops PR before expecting the new functionality to reach the managed/dev clusters.
+- If you update infrastructure (foundations), capture new outputs in `zingbang_cluster_ops` so those manifests reference the revised resources.
+- When debugging runtime failures locally, run `zingbang_local_experiments` workflows after ensuring your local cluster-ops state reflects the latest promoted config (e.g., by pulling the merged PR or running `platform-api:image:load`).
+
 ## How we work (Linear + GitHub)
 
 - Linear is the source of truth for task state.
