@@ -101,6 +101,7 @@ cd zingbang_business  # move into a real repo before running mise or other repo-
 
 ### Release/Automation Notes
 - Always run `mise run <task>` inside the repo that owns the `.mise.toml` defining `<task>` (e.g., release notes live in `zingbang_business`). `mise` run from the workspace root will report "no tasks defined" because the workspace itself is just an entrypoint.
+- All release artifacts (manifests, changelog entries, release notes) belong in `zingbang_business/docs/releases/`. Do not add or edit release docs from the workspace root.
 - Credentials for release automation (LINEAR API key, AWS/GCP roles, email service tokens) come through environment; do not hardcode secrets in files. See `scripts/` directories in other repos for CLI helpers.
 
 ## Related Documentation
