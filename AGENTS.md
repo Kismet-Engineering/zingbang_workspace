@@ -62,6 +62,7 @@ Run local verification for changes that can be validated in under ~5 minutes.
 - Label conventions (lightweight): one `track:*`, one `type:*`, one `horizon:*`, one `component:*`
 - Update issue with file paths and validation notes after implementation
 - Always close tickets with a comment that links to the work (commit/PR) and summarizes evidence delivered
+- Project/ticket updates should use short bullet lists (avoid paragraph walls of text)
 
 ### Code Style
 - Go: tight package boundaries (`api` for transport, `service` for domain)
